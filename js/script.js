@@ -1,11 +1,12 @@
 'use strict';
 
 class Todo{
-  constructor(form, input, todolist, todoComleted){
+  constructor(form, input, todoList, todoCompleted){
     this.form = document.querySelector(form);
     this.input = document.querySelector(input);
-    this.todolist = document.querySelector(todolist);
-    this.todoComleted = document.querySelector(todoComleted);
+    this.todoList = document.querySelector(todoList);
+    this.todoCompleted = document.querySelector(todoCompleted);
+
     this.todoData = new Map(JSON.parse(localStorage.getItem('toDoList')));//коллекция 
 
   }
@@ -15,8 +16,8 @@ class Todo{
   }
 
   render(){
-    this.todolist.textContent = '';
-    this.todoComleted.textContent = '';
+    this.todoList.textContent = '';
+    this.todoCompleted.textContent = '';
     this.todoData.forEach(this.createItem);
     this.addToStorage ();
   }
@@ -35,10 +36,10 @@ class Todo{
         </div>
     `);
 
-    if(todo.comleted){
-      this.todoComleted.append(li);
+    if(todo.completed){
+      this.todoCompleted.append(li);
     }else{
-      this.todolist.append(li);
+      this.todoList.append(li);
     }
   }
 
@@ -55,55 +56,44 @@ class Todo{
       }
 
       this.todoData.set(newTodo.key, newTodo);
+      this.input.value ='';
 
       this.render();
     }
-    console.log(this);
     }
 
   generateKey(){
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);//создаем не большой набор символов
   }
 
-  deleteItem(){
-    const todoRemove = document.querySelector('.todo-remove');//удаление строки
-    todoRemove.addEventListener('click',()=>{
-      
-    // delete this.todoData[todo.key]; //удаляем по ключу
-    this.todoData.delete(this.key);
-    // localStorage.clear(this.todoData.splice(this.key, 1)); //удаляет полностью 
-    render();
+  deleteItem(li){//удаление строки
+    this.todoData.forEach((item, i, arr) =>{
+      if(item.key === li.key){
+        li.remove(li);
+        arr.delete(i);
+      }
+      this.render();
     });
   }
 
-  // completedItem(){
-  //   const btnTodoCompleted = document.querySelector('.todo-complete')
-  //   btnTodoCompleted.addEventListener('click', function(){
-  //     this.todoData.forEach((item) =>{
-  //         if (item.this.todoData === this.key){
-  //           todo.completed = true;
-  //           this.render();
-  //         }else{
-  //           todo.completed = false;
-  //           this.render();
-  //         }
-  //     });
-  //   });
-  //   localStorage.setItem('todoData', JSON.stringify(this.todoData));//ковектируем в json формат
-  //   const data = JSON.parse(localStorage.getItem('todoData')); //конвертировать обратно в формат javascript
-  // }
+  completedItem(li){//меняем дела 
+    this.todoData.forEach((item) =>{
+          if(item.key === li.key){
+            item.completed = !item.completed;
+          }
+          this.render();
+        });
+  }
 
   handler(){
     const toDoContainer = document.querySelector('.todo-container');
 
           toDoContainer.addEventListener('click', (event) =>{
             let target = event.target; //записываем в таргет элемент на котором произошло событие.
-            if(target === target.closest('.todo-remove')){
-              console.log(target);
-              this.deleteItem();
-            }else if(target === target.closest('.todo-complete')){
-              console.log(target);
-              // this.completedItem();
+            if(target.matches('.todo-remove')){
+              this.deleteItem(target.closest('.todo-item'));
+            }else if(target.matches('.todo-complete')){
+              this.completedItem(target.closest('.todo-item'));
             }
           });
   }
